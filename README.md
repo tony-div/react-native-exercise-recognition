@@ -7,13 +7,7 @@ It exposes a small JS API backed by a C++ HybridObject and Rust classifier runti
 ## Install
 
 ```bash
-npm install react-native-exercise-recognition react-native-nitro-modules
-```
-
-If you are feeding landmarks from MediaPipe, install the companion library used by the example app:
-
-```bash
-npm install github:tony-div/react-native-pose-landmarks#v1.1.0
+npm install github:tony-div/react-native-exercise-recognition#v1.1.0 github:tony-div/react-native-pose-landmarks#v1.1.0 react-native-nitro-modules
 ```
 
 ## Usage
