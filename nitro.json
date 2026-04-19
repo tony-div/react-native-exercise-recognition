@@ -1,0 +1,26 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": [
+    "exerciserecognition"
+  ],
+  "ios": {
+    "iosModuleName": "NitroExerciseRecognition"
+  },
+  "android": {
+    "androidNamespace": [
+      "exerciserecognition"
+    ],
+    "androidCxxLibName": "NitroExerciseRecognition"
+  },
+  "autolinking": {
+    "ExerciseRecognition": {
+      "all": {
+        "language": "c++",
+        "implementationClassName": "HybridExerciseRecognition"
+      }
+    }
+  },
+  "ignorePaths": [
+    "**/node_modules"
+  ]
+}
