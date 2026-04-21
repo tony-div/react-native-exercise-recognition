@@ -15,6 +15,7 @@
     "rust",
     "android/build.gradle",
     "android/build-rust-android.sh",
+    "android/prebuilt",
     "android/gradle.properties",
     "android/fix-prefab.gradle",
     "android/CMakeLists.txt",
