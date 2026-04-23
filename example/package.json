@@ -16,7 +16,7 @@
     "react-native-safe-area-context": "^5.5.2",
     "react-native-exercise-recognition": "file:..",
     "react-native-nitro-modules": "0.35.4",
-    "react-native-pose-landmarks": "github:tony-div/react-native-pose-landmarks#v1.1.0"
+    "react-native-pose-landmarks": "github:tony-div/react-native-pose-landmarks#v1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -34,6 +34,10 @@ jobs:
           npm install
           chmod +x example/android/gradlew
 
+      - name: Build native modules
+        run: |
+          npm run build
+
       - name: Build release APK
         working-directory: example/android
         run: ./gradlew assembleRelease --no-daemon
