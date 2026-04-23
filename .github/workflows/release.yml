@@ -32,12 +32,9 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
+          cd example && npm install
+          cd ..
           chmod +x example/android/gradlew
-
-      - name: Build native modules
-        run: |
-          npm run clean
-          npx bob build
 
       - name: Build release APK
         working-directory: example/android
