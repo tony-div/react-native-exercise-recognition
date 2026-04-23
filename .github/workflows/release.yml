@@ -36,7 +36,8 @@ jobs:
 
       - name: Build native modules
         run: |
-          npm run build
+          npm run clean
+          npx bob build
 
       - name: Build release APK
         working-directory: example/android
