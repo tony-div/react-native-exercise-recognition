@@ -70,14 +70,14 @@
     "react": "19.2.3",
     "react-native": "0.85.1",
     "react-native-nitro-modules": "^0.35.4",
-    "react-native-pose-landmarks": "github:tony-div/react-native-pose-landmarks#v1.1.0",
+    "react-native-pose-landmarks": "github:tony-div/react-native-pose-landmarks#v1.2.0",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
     "react-native-nitro-modules": "*",
-    "react-native-pose-landmarks": "1.1.0"
+    "react-native-pose-landmarks": "1.2.0"
   },
   "eslintConfig": {
     "root": true,
