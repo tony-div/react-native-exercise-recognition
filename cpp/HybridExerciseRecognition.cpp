@@ -136,14 +136,55 @@ void HybridExerciseRecognition::startSession(const std::optional<StartSessionCon
     if (config->minConfidence.has_value()) {
       minConfidence_ = config->minConfidence.value();
       logDebugFmt("startSession(): updated minConfidence=%.4f", minConfidence_);
+      if (!config->enterConfidence.has_value()) {
+        enterConfidence_ = minConfidence_;
+        logDebugFmt("startSession(): enterConfidence follows minConfidence=%.4f", enterConfidence_);
+      }
     }
     if (config->smoothingWindow.has_value()) {
       smoothingWindow_ = static_cast<int>(config->smoothingWindow.value());
       logDebugFmt("startSession(): updated smoothingWindow=%d", smoothingWindow_);
     }
+    if (config->enterConfidence.has_value()) {
+      enterConfidence_ = config->enterConfidence.value();
+      logDebugFmt("startSession(): updated enterConfidence=%.4f", enterConfidence_);
+    }
+    if (config->exitConfidence.has_value()) {
+      exitConfidence_ = config->exitConfidence.value();
+      logDebugFmt("startSession(): updated exitConfidence=%.4f", exitConfidence_);
+    }
+    if (config->enterFrames.has_value()) {
+      enterFrames_ = static_cast<int>(config->enterFrames.value());
+      logDebugFmt("startSession(): updated enterFrames=%d", enterFrames_);
+    }
+    if (config->exitFrames.has_value()) {
+      exitFrames_ = static_cast<int>(config->exitFrames.value());
+      logDebugFmt("startSession(): updated exitFrames=%d", exitFrames_);
+    }
+    if (config->emaAlpha.has_value()) {
+      emaAlpha_ = config->emaAlpha.value();
+      logDebugFmt("startSession(): updated emaAlpha=%.4f", emaAlpha_);
+    }
+    if (config->minVisibility.has_value()) {
+      minVisibility_ = config->minVisibility.value();
+      logDebugFmt("startSession(): updated minVisibility=%.4f", minVisibility_);
+    }
+    if (config->minVisibleUpperBodyJoints.has_value()) {
+      minVisibleUpperBodyJoints_ = static_cast<int>(config->minVisibleUpperBodyJoints.value());
+      logDebugFmt("startSession(): updated minVisibleUpperBodyJoints=%d", minVisibleUpperBodyJoints_);
+    }
   }
 
-  rust_.startSession(minConfidence_, smoothingWindow_);
+  rust_.startSession(
+    minConfidence_,
+    smoothingWindow_,
+    enterConfidence_,
+    exitConfidence_,
+    enterFrames_,
+    exitFrames_,
+    emaAlpha_,
+    minVisibility_,
+    minVisibleUpperBodyJoints_);
   logDebug("startSession(): rust session started");
   currentExercise_ = nitro::NullType();
   currentConfidence_ = 0.0;

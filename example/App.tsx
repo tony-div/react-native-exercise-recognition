@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Button, Dimensions, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { PoseLandmarks } from 'react-native-pose-landmarks';
 import { exerciseRecognition } from 'react-native-exercise-recognition';
@@ -8,6 +8,44 @@ const LANDMARK_COUNT = 33;
 const VALUES_PER_LANDMARK = 4;
 const BONE_THICKNESS = 3;
 const DEFAULT_SIZE = Dimensions.get('window');
+
+type SessionSettings = {
+  minConfidence: string;
+  smoothingWindow: string;
+  enterConfidence: string;
+  exitConfidence: string;
+  enterFrames: string;
+  exitFrames: string;
+  emaAlpha: string;
+  minVisibility: string;
+  minVisibleUpperBodyJoints: string;
+};
+
+type SessionSettingKey = keyof SessionSettings;
+
+const SETTING_FIELDS: ReadonlyArray<{ key: SessionSettingKey; label: string }> = [
+  { key: 'minConfidence', label: 'minConfidence' },
+  { key: 'smoothingWindow', label: 'smoothingWindow' },
+  { key: 'enterConfidence', label: 'enterConfidence' },
+  { key: 'exitConfidence', label: 'exitConfidence' },
+  { key: 'enterFrames', label: 'enterFrames' },
+  { key: 'exitFrames', label: 'exitFrames' },
+  { key: 'emaAlpha', label: 'emaAlpha' },
+  { key: 'minVisibility', label: 'minVisibility' },
+  { key: 'minVisibleUpperBodyJoints', label: 'minVisibleUpperBodyJoints' },
+];
+
+const DEFAULT_SETTINGS: SessionSettings = {
+  minConfidence: '0.6',
+  smoothingWindow: '5',
+  enterConfidence: '0.65',
+  exitConfidence: '0.45',
+  enterFrames: '3',
+  exitFrames: '8',
+  emaAlpha: '0.2',
+  minVisibility: '0.2',
+  minVisibleUpperBodyJoints: '4',
+};
 
 const POSE_CONNECTIONS: ReadonlyArray<readonly [number, number]> = [
   [0, 1],
@@ -57,7 +95,16 @@ function App(): React.JSX.Element {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [landmarks, setLandmarks] = useState<number[]>([]);
   const [viewport, setViewport] = useState({ width: DEFAULT_SIZE.width, height: DEFAULT_SIZE.height * 0.62 });
+  const [settings, setSettings] = useState<SessionSettings>(DEFAULT_SETTINGS);
   const hasLoadedModel = useRef(false);
+
+  const parseNumber = (raw: string): number | undefined => {
+    const value = Number(raw);
+    if (!Number.isFinite(value)) {
+      return undefined;
+    }
+    return value;
+  };
 
   useEffect(() => {
     if (!sessionActive) {
@@ -118,7 +165,17 @@ function App(): React.JSX.Element {
   }, [sessionActive]);
 
   const onStart = () => {
-    exerciseRecognition.startSession({ minConfidence: 0.6, smoothingWindow: 5 });
+    exerciseRecognition.startSession({
+      minConfidence: parseNumber(settings.minConfidence),
+      smoothingWindow: parseNumber(settings.smoothingWindow),
+      enterConfidence: parseNumber(settings.enterConfidence),
+      exitConfidence: parseNumber(settings.exitConfidence),
+      enterFrames: parseNumber(settings.enterFrames),
+      exitFrames: parseNumber(settings.exitFrames),
+      emaAlpha: parseNumber(settings.emaAlpha),
+      minVisibility: parseNumber(settings.minVisibility),
+      minVisibleUpperBodyJoints: parseNumber(settings.minVisibleUpperBodyJoints),
+    });
     setCurrentExercise('Collecting pose frames...');
     setConfidence(0);
     setSessionActive(true);
@@ -196,6 +253,7 @@ function App(): React.JSX.Element {
     <SafeAreaProvider>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.hud}>
             <Text style={styles.title}>Live Exercise Recognition</Text>
             <Text style={styles.prediction}>{currentExercise.toUpperCase()}</Text>
@@ -205,6 +263,24 @@ function App(): React.JSX.Element {
             <Text style={styles.meta}>Classifier inference: {classifierInferenceMs >= 0 ? `${classifierInferenceMs.toFixed(1)} ms` : '--'}</Text>
             <Text style={styles.meta}>E2E latency: {e2eLatencyMs >= 0 ? `${e2eLatencyMs.toFixed(1)} ms` : '--'}</Text>
             <Text style={styles.meta}>Landmark points: {Math.floor(landmarks.length / VALUES_PER_LANDMARK)} / 33</Text>
+            <Text style={styles.meta}>Session active: {sessionActive ? 'yes' : 'no'}</Text>
+          </View>
+
+          <View style={styles.tuningPanel}>
+            <Text style={styles.tuningTitle}>Session Tuning</Text>
+            <Text style={styles.tuningHint}>Change values then tap Start Session.</Text>
+            {SETTING_FIELDS.map(({ key, label }) => (
+              <View style={styles.inputRow} key={key}>
+                <Text style={styles.inputLabel}>{label}</Text>
+                <TextInput
+                  value={settings[key]}
+                  onChangeText={text => setSettings(prev => ({ ...prev, [key]: text }))}
+                  keyboardType="numeric"
+                  style={styles.input}
+                  editable={!sessionActive}
+                />
+              </View>
+            ))}
           </View>
 
           <View
@@ -224,12 +300,13 @@ function App(): React.JSX.Element {
 
           <View style={styles.controls}>
             <View style={styles.buttons}>
-            <Button title="Start Session" onPress={onStart} disabled={sessionActive} />
+              <Button title="Start Session" onPress={onStart} disabled={sessionActive} />
             </View>
             <View style={styles.buttons}>
-            <Button title="Stop Session" onPress={onStop} disabled={!sessionActive} />
+              <Button title="Stop Session" onPress={onStop} disabled={!sessionActive} />
             </View>
           </View>
+          </ScrollView>
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -243,6 +320,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -277,6 +356,47 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 2,
     color: '#97adc1',
+  },
+  tuningPanel: {
+    marginBottom: 12,
+    backgroundColor: '#122738',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#2a4458',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  tuningTitle: {
+    color: '#e7f7ff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  tuningHint: {
+    color: '#9fc4d9',
+    fontSize: 12,
+    marginTop: 2,
+    marginBottom: 8,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  inputLabel: {
+    flex: 1,
+    color: '#c9e6f7',
+    fontSize: 13,
+  },
+  input: {
+    width: 92,
+    borderWidth: 1,
+    borderColor: '#3a627f',
+    borderRadius: 8,
+    backgroundColor: '#0b1824',
+    color: '#f2fbff',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    fontSize: 13,
   },
   viewport: {
     flex: 1,

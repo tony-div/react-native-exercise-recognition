@@ -31,6 +31,13 @@ class HybridExerciseRecognition : public HybridExerciseRecognitionSpec {
   double lastClassifierInferenceMs_ = -1.0;
   double minConfidence_ = 0.6;
   int smoothingWindow_ = 5;
+  double enterConfidence_ = 0.65;
+  double exitConfidence_ = 0.45;
+  int enterFrames_ = 3;
+  int exitFrames_ = 8;
+  double emaAlpha_ = 0.2;
+  double minVisibility_ = 0.2;
+  int minVisibleUpperBodyJoints_ = 4;
 };
 
 } // namespace margelo::nitro::exerciserecognition

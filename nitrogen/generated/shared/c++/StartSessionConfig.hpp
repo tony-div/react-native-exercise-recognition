@@ -41,10 +41,17 @@ namespace margelo::nitro::exerciserecognition {
   public:
     std::optional<double> minConfidence     SWIFT_PRIVATE;
     std::optional<double> smoothingWindow     SWIFT_PRIVATE;
+    std::optional<double> enterConfidence     SWIFT_PRIVATE;
+    std::optional<double> exitConfidence     SWIFT_PRIVATE;
+    std::optional<double> enterFrames     SWIFT_PRIVATE;
+    std::optional<double> exitFrames     SWIFT_PRIVATE;
+    std::optional<double> emaAlpha     SWIFT_PRIVATE;
+    std::optional<double> minVisibility     SWIFT_PRIVATE;
+    std::optional<double> minVisibleUpperBodyJoints     SWIFT_PRIVATE;
 
   public:
     StartSessionConfig() = default;
-    explicit StartSessionConfig(std::optional<double> minConfidence, std::optional<double> smoothingWindow): minConfidence(minConfidence), smoothingWindow(smoothingWindow) {}
+    explicit StartSessionConfig(std::optional<double> minConfidence, std::optional<double> smoothingWindow, std::optional<double> enterConfidence, std::optional<double> exitConfidence, std::optional<double> enterFrames, std::optional<double> exitFrames, std::optional<double> emaAlpha, std::optional<double> minVisibility, std::optional<double> minVisibleUpperBodyJoints): minConfidence(minConfidence), smoothingWindow(smoothingWindow), enterConfidence(enterConfidence), exitConfidence(exitConfidence), enterFrames(enterFrames), exitFrames(exitFrames), emaAlpha(emaAlpha), minVisibility(minVisibility), minVisibleUpperBodyJoints(minVisibleUpperBodyJoints) {}
 
   public:
     friend bool operator==(const StartSessionConfig& lhs, const StartSessionConfig& rhs) = default;
@@ -61,13 +68,27 @@ namespace margelo::nitro {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::exerciserecognition::StartSessionConfig(
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minConfidence"))),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "smoothingWindow")))
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "smoothingWindow"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enterConfidence"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "exitConfidence"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enterFrames"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "exitFrames"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "emaAlpha"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibility"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibleUpperBodyJoints")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::exerciserecognition::StartSessionConfig& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "minConfidence"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.minConfidence));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "smoothingWindow"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.smoothingWindow));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "enterConfidence"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.enterConfidence));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "exitConfidence"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.exitConfidence));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "enterFrames"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.enterFrames));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "exitFrames"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.exitFrames));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "emaAlpha"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.emaAlpha));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "minVisibility"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.minVisibility));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "minVisibleUpperBodyJoints"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.minVisibleUpperBodyJoints));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -80,6 +101,13 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minConfidence")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "smoothingWindow")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enterConfidence")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "exitConfidence")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enterFrames")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "exitFrames")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "emaAlpha")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibility")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibleUpperBodyJoints")))) return false;
       return true;
     }
   };

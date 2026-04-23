@@ -8,7 +8,16 @@ namespace margelo::nitro::exerciserecognition {
 class ExerciseRecognitionRustBridge {
  public:
   bool loadModelFromJson(const std::string& modelJson);
-  void startSession(double minConfidence, int smoothingWindow);
+  void startSession(
+    double minConfidence,
+    int smoothingWindow,
+    double enterConfidence,
+    double exitConfidence,
+    int enterFrames,
+    int exitFrames,
+    double emaAlpha,
+    double minVisibility,
+    int minVisibleUpperBodyJoints);
   void stopSession();
   void ingestLandmarksBuffer(const std::vector<double>& landmarks);
   double getCurrentConfidence();

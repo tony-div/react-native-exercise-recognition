@@ -3,9 +3,19 @@ import { type HybridObject, NitroModules } from 'react-native-nitro-modules'
 export interface StartSessionConfig {
   minConfidence?: number
   smoothingWindow?: number
+  enterConfidence?: number
+  exitConfidence?: number
+  enterFrames?: number
+  exitFrames?: number
+  emaAlpha?: number
+  minVisibility?: number
+  minVisibleUpperBodyJoints?: number
 }
 
-export interface ExerciseRecognition extends HybridObject<{ ios: 'c++', android: 'c++' }> {
+export interface ExerciseRecognition extends HybridObject<{
+  ios: 'c++'
+  android: 'c++'
+}> {
   loadModelFromJson(modelJson: string): boolean
   loadModelFromAsset(assetName: string): boolean
   startSession(config?: StartSessionConfig): void
@@ -16,6 +26,5 @@ export interface ExerciseRecognition extends HybridObject<{ ios: 'c++', android:
   getLastClassifierInferenceTimeMs(): number
 }
 
-export const exerciseRecognition = NitroModules.createHybridObject<ExerciseRecognition>(
-  'ExerciseRecognition'
-)
+export const exerciseRecognition =
+  NitroModules.createHybridObject<ExerciseRecognition>('ExerciseRecognition')
