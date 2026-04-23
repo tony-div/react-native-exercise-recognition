@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Setup JDK 17
@@ -30,7 +30,10 @@ jobs:
           cache: 'gradle'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          file example/android/gradlew
+          head -1 example/android/gradlew
 
       - name: Build release APK
         working-directory: example/android
