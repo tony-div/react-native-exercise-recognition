@@ -7,7 +7,7 @@ It exposes a small JS API backed by a C++ HybridObject and Rust classifier runti
 ## Install
 
 ```bash
-npm install react-native-exercise-recognition react-native-nitro-modules react-native-pose-landmarks
+npm install github:tony-div/react-native-exercise-recognition react-native-nitro-modules github:tony-div/react-native-pose-landmarks
 ```
 
 ## Usage
