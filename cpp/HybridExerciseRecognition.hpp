@@ -38,6 +38,8 @@ class HybridExerciseRecognition : public HybridExerciseRecognitionSpec {
   double emaAlpha_ = 0.2;
   double minVisibility_ = 0.2;
   int minVisibleUpperBodyJoints_ = 4;
+  double nullExitWindowSeconds_ = 5.0;
+  double nullExitWindowThreshold_ = 0.99;
 };
 
 } // namespace margelo::nitro::exerciserecognition

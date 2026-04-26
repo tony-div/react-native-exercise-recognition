@@ -173,6 +173,14 @@ void HybridExerciseRecognition::startSession(const std::optional<StartSessionCon
       minVisibleUpperBodyJoints_ = static_cast<int>(config->minVisibleUpperBodyJoints.value());
       logDebugFmt("startSession(): updated minVisibleUpperBodyJoints=%d", minVisibleUpperBodyJoints_);
     }
+    if (config->nullExitWindowSeconds.has_value()) {
+      nullExitWindowSeconds_ = config->nullExitWindowSeconds.value();
+      logDebugFmt("startSession(): updated nullExitWindowSeconds=%.2f", nullExitWindowSeconds_);
+    }
+    if (config->nullExitWindowThreshold.has_value()) {
+      nullExitWindowThreshold_ = config->nullExitWindowThreshold.value();
+      logDebugFmt("startSession(): updated nullExitWindowThreshold=%.2f", nullExitWindowThreshold_);
+    }
   }
 
   rust_.startSession(
@@ -184,7 +192,9 @@ void HybridExerciseRecognition::startSession(const std::optional<StartSessionCon
     exitFrames_,
     emaAlpha_,
     minVisibility_,
-    minVisibleUpperBodyJoints_);
+    minVisibleUpperBodyJoints_,
+    nullExitWindowSeconds_,
+    nullExitWindowThreshold_);
   logDebug("startSession(): rust session started");
   currentExercise_ = nitro::NullType();
   currentConfidence_ = 0.0;

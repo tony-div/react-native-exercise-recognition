@@ -48,10 +48,12 @@ namespace margelo::nitro::exerciserecognition {
     std::optional<double> emaAlpha     SWIFT_PRIVATE;
     std::optional<double> minVisibility     SWIFT_PRIVATE;
     std::optional<double> minVisibleUpperBodyJoints     SWIFT_PRIVATE;
+    std::optional<double> nullExitWindowSeconds     SWIFT_PRIVATE;
+    std::optional<double> nullExitWindowThreshold     SWIFT_PRIVATE;
 
   public:
     StartSessionConfig() = default;
-    explicit StartSessionConfig(std::optional<double> minConfidence, std::optional<double> smoothingWindow, std::optional<double> enterConfidence, std::optional<double> exitConfidence, std::optional<double> enterFrames, std::optional<double> exitFrames, std::optional<double> emaAlpha, std::optional<double> minVisibility, std::optional<double> minVisibleUpperBodyJoints): minConfidence(minConfidence), smoothingWindow(smoothingWindow), enterConfidence(enterConfidence), exitConfidence(exitConfidence), enterFrames(enterFrames), exitFrames(exitFrames), emaAlpha(emaAlpha), minVisibility(minVisibility), minVisibleUpperBodyJoints(minVisibleUpperBodyJoints) {}
+    explicit StartSessionConfig(std::optional<double> minConfidence, std::optional<double> smoothingWindow, std::optional<double> enterConfidence, std::optional<double> exitConfidence, std::optional<double> enterFrames, std::optional<double> exitFrames, std::optional<double> emaAlpha, std::optional<double> minVisibility, std::optional<double> minVisibleUpperBodyJoints, std::optional<double> nullExitWindowSeconds, std::optional<double> nullExitWindowThreshold): minConfidence(minConfidence), smoothingWindow(smoothingWindow), enterConfidence(enterConfidence), exitConfidence(exitConfidence), enterFrames(enterFrames), exitFrames(exitFrames), emaAlpha(emaAlpha), minVisibility(minVisibility), minVisibleUpperBodyJoints(minVisibleUpperBodyJoints), nullExitWindowSeconds(nullExitWindowSeconds), nullExitWindowThreshold(nullExitWindowThreshold) {}
 
   public:
     friend bool operator==(const StartSessionConfig& lhs, const StartSessionConfig& rhs) = default;
@@ -75,7 +77,9 @@ namespace margelo::nitro {
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "exitFrames"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "emaAlpha"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibility"))),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibleUpperBodyJoints")))
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibleUpperBodyJoints"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "nullExitWindowSeconds"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "nullExitWindowThreshold")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::exerciserecognition::StartSessionConfig& arg) {
@@ -89,6 +93,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "emaAlpha"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.emaAlpha));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "minVisibility"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.minVisibility));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "minVisibleUpperBodyJoints"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.minVisibleUpperBodyJoints));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "nullExitWindowSeconds"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.nullExitWindowSeconds));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "nullExitWindowThreshold"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.nullExitWindowThreshold));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -108,6 +114,8 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "emaAlpha")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibility")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minVisibleUpperBodyJoints")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "nullExitWindowSeconds")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "nullExitWindowThreshold")))) return false;
       return true;
     }
   };

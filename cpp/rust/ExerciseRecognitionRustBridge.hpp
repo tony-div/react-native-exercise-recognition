@@ -17,7 +17,9 @@ class ExerciseRecognitionRustBridge {
     int exitFrames,
     double emaAlpha,
     double minVisibility,
-    int minVisibleUpperBodyJoints);
+    int minVisibleUpperBodyJoints,
+    double nullExitWindowSeconds,
+    double nullExitWindowThreshold);
   void stopSession();
   void ingestLandmarksBuffer(const std::vector<double>& landmarks);
   double getCurrentConfidence();

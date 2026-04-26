@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Dimensions, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { PoseLandmarks } from 'react-native-pose-landmarks';
 import { exerciseRecognition } from 'react-native-exercise-recognition';
@@ -10,18 +10,18 @@ const BONE_THICKNESS = 3;
 const DEFAULT_SIZE = Dimensions.get('window');
 
 type SessionSettings = {
-  minConfidence: string;
-  smoothingWindow: string;
-  enterConfidence: string;
-  exitConfidence: string;
-  enterFrames: string;
-  exitFrames: string;
-  emaAlpha: string;
-  minVisibility: string;
-  minVisibleUpperBodyJoints: string;
-};
-
-type SessionSettingKey = keyof SessionSettings;
+  minConfidence: string
+  smoothingWindow: string
+  enterConfidence: string
+  exitConfidence: string
+  enterFrames: string
+  exitFrames: string
+  emaAlpha: string
+  minVisibility: string
+  minVisibleUpperBodyJoints: string
+  nullExitWindowSeconds: string
+  nullExitWindowThreshold: string
+}
 
 const SETTING_FIELDS: ReadonlyArray<{ key: SessionSettingKey; label: string }> = [
   { key: 'minConfidence', label: 'minConfidence' },
@@ -33,6 +33,8 @@ const SETTING_FIELDS: ReadonlyArray<{ key: SessionSettingKey; label: string }> =
   { key: 'emaAlpha', label: 'emaAlpha' },
   { key: 'minVisibility', label: 'minVisibility' },
   { key: 'minVisibleUpperBodyJoints', label: 'minVisibleUpperBodyJoints' },
+  { key: 'nullExitWindowSeconds', label: 'nullExitWindowSeconds' },
+  { key: 'nullExitWindowThreshold', label: 'nullExitWindowThreshold' },
 ];
 
 const DEFAULT_SETTINGS: SessionSettings = {
@@ -45,7 +47,11 @@ const DEFAULT_SETTINGS: SessionSettings = {
   emaAlpha: '0.2',
   minVisibility: '0.2',
   minVisibleUpperBodyJoints: '4',
+  nullExitWindowSeconds: '5',
+  nullExitWindowThreshold: '0.99',
 };
+
+type SessionSettingKey = keyof SessionSettings;
 
 const POSE_CONNECTIONS: ReadonlyArray<readonly [number, number]> = [
   [0, 1],
@@ -96,6 +102,7 @@ function App(): React.JSX.Element {
   const [landmarks, setLandmarks] = useState<number[]>([]);
   const [viewport, setViewport] = useState({ width: DEFAULT_SIZE.width, height: DEFAULT_SIZE.height * 0.62 });
   const [settings, setSettings] = useState<SessionSettings>(DEFAULT_SETTINGS);
+  const [tuningExpanded, setTuningExpanded] = useState(false);
   const hasLoadedModel = useRef(false);
 
   const parseNumber = (raw: string): number | undefined => {
@@ -209,6 +216,9 @@ function App(): React.JSX.Element {
       const deltaX = x2 - x1;
       const deltaY = y2 - y1;
       const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      if (length < 1) {
+        return null;
+      }
       const angle = Math.atan2(deltaY, deltaX);
       const midX = (x1 + x2) / 2;
       const midY = (y1 + y2) / 2;
@@ -267,20 +277,26 @@ function App(): React.JSX.Element {
           </View>
 
           <View style={styles.tuningPanel}>
-            <Text style={styles.tuningTitle}>Session Tuning</Text>
-            <Text style={styles.tuningHint}>Change values then tap Start Session.</Text>
-            {SETTING_FIELDS.map(({ key, label }) => (
-              <View style={styles.inputRow} key={key}>
-                <Text style={styles.inputLabel}>{label}</Text>
-                <TextInput
-                  value={settings[key]}
-                  onChangeText={text => setSettings(prev => ({ ...prev, [key]: text }))}
-                  keyboardType="numeric"
-                  style={styles.input}
-                  editable={!sessionActive}
-                />
-              </View>
-            ))}
+            <TouchableOpacity onPress={() => setTuningExpanded(v => !v)}>
+              <Text style={styles.tuningTitle}>Session Tuning {tuningExpanded ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+            {tuningExpanded ? (
+              <>
+                <Text style={styles.tuningHint}>Change values then tap Start Session.</Text>
+                {SETTING_FIELDS.map(({ key, label }) => (
+                  <View style={styles.inputRow} key={key}>
+                    <Text style={styles.inputLabel}>{label}</Text>
+                    <TextInput
+                      value={settings[key]}
+                      onChangeText={text => setSettings(prev => ({ ...prev, [key]: text }))}
+                      keyboardType="numeric"
+                      style={styles.input}
+                      editable={!sessionActive}
+                    />
+                  </View>
+                ))}
+              </>
+            ) : null}
           </View>
 
           <View
@@ -320,6 +336,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    flexDirection: 'column',
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -399,7 +416,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   viewport: {
+    position: 'relative',
     flex: 1,
+    height: 280,
     borderRadius: 14,
     overflow: 'hidden',
     backgroundColor: '#0e1d2a',

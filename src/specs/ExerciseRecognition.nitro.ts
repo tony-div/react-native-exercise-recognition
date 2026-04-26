@@ -10,6 +10,8 @@ export interface StartSessionConfig {
   emaAlpha?: number
   minVisibility?: number
   minVisibleUpperBodyJoints?: number
+  nullExitWindowSeconds?: number
+  nullExitWindowThreshold?: number
 }
 
 export interface ExerciseRecognition extends HybridObject<{

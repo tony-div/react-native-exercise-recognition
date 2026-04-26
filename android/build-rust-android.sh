@@ -12,17 +12,21 @@ ABI_MAP=(
   "x86_64-linux-android:x86_64"
 )
 
-has_all_prebuilt=true
-for pair in "${ABI_MAP[@]}"; do
-  target="${pair%%:*}"
-  abi="${pair##*:}"
-  if [ ! -f "$PREBUILT_DIR/$abi/libexercise_recognition_rust.a" ]; then
-    has_all_prebuilt=false
-    break
-  fi
-done
+check_stale() {
+  for pair in "${ABI_MAP[@]}"; do
+    abi="${pair##*:}"
+    prebuilt="$PREBUILT_DIR/$abi/libexercise_recognition_rust.a"
+    if [ -f "$prebuilt" ]; then
+      if [ "$prebuilt" -nt "$RUST_DIR/Cargo.toml" ] && [ "$prebuilt" -nt "$RUST_DIR/src/lib.rs" ]; then
+        continue
+      fi
+    fi
+    return 0
+  done
+  return 1
+}
 
-if [ "$has_all_prebuilt" = true ]; then
+if ! check_stale; then
   echo "Using prebuilt binaries"
   exit 0
 fi

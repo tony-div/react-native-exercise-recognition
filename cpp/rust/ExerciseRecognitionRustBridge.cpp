@@ -19,7 +19,9 @@ void exrec_start_session(
   int exit_frames,
   double ema_alpha,
   double min_visibility,
-  int min_visible_upper_body_joints);
+  int min_visible_upper_body_joints,
+  double null_exit_window_seconds,
+  double null_exit_window_threshold);
 void exrec_stop_session();
 void exrec_ingest_landmarks_buffer(const double* values, size_t len);
 double exrec_get_current_confidence();
@@ -97,7 +99,9 @@ void ExerciseRecognitionRustBridge::startSession(
   int exitFrames,
   double emaAlpha,
   double minVisibility,
-  int minVisibleUpperBodyJoints) {
+  int minVisibleUpperBodyJoints,
+  double nullExitWindowSeconds,
+  double nullExitWindowThreshold) {
 #if defined(EXREC_USE_RUST)
   logDebugFmt("rust.startSession(): minConfidence=%.4f", minConfidence);
   logDebugFmt("rust.startSession(): smoothingWindow=%d", smoothingWindow);
@@ -108,6 +112,8 @@ void ExerciseRecognitionRustBridge::startSession(
   logDebugFmt("rust.startSession(): emaAlpha=%.4f", emaAlpha);
   logDebugFmt("rust.startSession(): minVisibility=%.4f", minVisibility);
   logDebugFmt("rust.startSession(): minVisibleUpperBodyJoints=%d", minVisibleUpperBodyJoints);
+  logDebugFmt("rust.startSession(): nullExitWindowSeconds=%.2f", nullExitWindowSeconds);
+  logDebugFmt("rust.startSession(): nullExitWindowThreshold=%.2f", nullExitWindowThreshold);
   exrec_start_session(
     minConfidence,
     smoothingWindow,
@@ -117,7 +123,9 @@ void ExerciseRecognitionRustBridge::startSession(
     exitFrames,
     emaAlpha,
     minVisibility,
-    minVisibleUpperBodyJoints);
+    minVisibleUpperBodyJoints,
+    nullExitWindowSeconds,
+    nullExitWindowThreshold);
   logDebug("rust.startSession(): rust session started");
 #else
   (void)minConfidence;
@@ -129,6 +137,8 @@ void ExerciseRecognitionRustBridge::startSession(
   (void)emaAlpha;
   (void)minVisibility;
   (void)minVisibleUpperBodyJoints;
+  (void)nullExitWindowSeconds;
+  (void)nullExitWindowThreshold;
   logDebug("rust.startSession(): EXREC_USE_RUST disabled");
 #endif
 }

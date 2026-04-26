@@ -8,6 +8,7 @@ use std::ffi::{c_char, c_double, c_int, CStr, CString};
 use std::sync::{Mutex, OnceLock};
 use std::time::Instant;
 
+#[allow(dead_code)]
 const LOG_TAG: &[u8] = b"NitroExerciseRec\0";
 
 #[cfg(target_os = "android")]
@@ -19,12 +20,13 @@ fn log_debug(message: &str) {
     #[cfg(target_os = "android")]
     {
         const ANDROID_LOG_DEBUG: c_int = 3;
+        const TAG: &[u8] = b"NitroExerciseRec\0";
         let safe_message = message.replace('\0', "\\0");
         if let Ok(c_message) = CString::new(safe_message) {
             unsafe {
                 let _ = __android_log_write(
                     ANDROID_LOG_DEBUG,
-                    LOG_TAG.as_ptr() as *const c_char,
+                    TAG.as_ptr() as *const c_char,
                     c_message.as_ptr(),
                 );
             }
@@ -72,6 +74,8 @@ struct SessionConfig {
     ema_alpha: f32,
     min_visibility: f32,
     min_visible_upper_body_joints: usize,
+    null_exit_window_seconds: f32,
+    null_exit_window_threshold: f32,
 }
 
 impl Default for SessionConfig {
@@ -86,6 +90,8 @@ impl Default for SessionConfig {
             ema_alpha: 0.2,
             min_visibility: 0.2,
             min_visible_upper_body_joints: 4,
+            null_exit_window_seconds: 5.0,
+            null_exit_window_threshold: 0.99,
         }
     }
 }
@@ -102,6 +108,8 @@ struct ClassifierState {
     pending_class_id: Option<i32>,
     pending_class_count: usize,
     low_confidence_count: usize,
+    null_probs_count: usize,
+    frame_times: VecDeque<Instant>,
 }
 
 impl Default for ClassifierState {
@@ -118,6 +126,8 @@ impl Default for ClassifierState {
             pending_class_id: None,
             pending_class_count: 0,
             low_confidence_count: 0,
+            null_probs_count: 0,
+            frame_times: VecDeque::new(),
         }
     }
 }
@@ -259,9 +269,11 @@ pub extern "C" fn exrec_start_session(
     ema_alpha: c_double,
     min_visibility: c_double,
     min_visible_upper_body_joints: c_int,
+    null_exit_window_seconds: c_double,
+    null_exit_window_threshold: c_double,
 ) {
     log_debug(&format!(
-        "exrec_start_session(): begin min_confidence={:.4} smoothing_window={} enter_confidence={:.4} exit_confidence={:.4} enter_frames={} exit_frames={} ema_alpha={:.4} min_visibility={:.4} min_visible_upper_body_joints={}",
+        "exrec_start_session(): begin min_confidence={:.4} smoothing_window={} enter_confidence={:.4} exit_confidence={:.4} enter_frames={} exit_frames={} ema_alpha={:.4} min_visibility={:.4} min_visible_upper_body_joints={} null_exit_window_seconds={:.2} null_exit_window_threshold={:.2}",
         min_confidence,
         smoothing_window,
         enter_confidence,
@@ -270,7 +282,9 @@ pub extern "C" fn exrec_start_session(
         exit_frames,
         ema_alpha,
         min_visibility,
-        min_visible_upper_body_joints
+        min_visible_upper_body_joints,
+        null_exit_window_seconds,
+        null_exit_window_threshold
     ));
     if let Ok(mut guard) = state().lock() {
         guard.config.min_confidence = if min_confidence > 0.0 {
@@ -321,13 +335,25 @@ pub extern "C" fn exrec_start_session(
         } else {
             4
         };
+        guard.config.null_exit_window_seconds = if null_exit_window_seconds > 0.0 {
+            null_exit_window_seconds as f32
+        } else {
+            5.0
+        };
+        guard.config.null_exit_window_threshold = if (0.0..=1.0).contains(&null_exit_window_threshold) {
+            null_exit_window_threshold as f32
+        } else {
+            0.99
+        };
         guard.frames.clear();
         guard.current_label = None;
         guard.current_confidence = 0.0;
         guard.last_inference_ms = -1.0;
+        guard.null_probs_count = 0;
+        guard.frame_times.clear();
         reset_temporal_state(&mut guard);
         log_debug(&format!(
-            "exrec_start_session(): config applied min_confidence={:.4} smoothing_window={} enter_confidence={:.4} exit_confidence={:.4} enter_frames={} exit_frames={} ema_alpha={:.4} min_visibility={:.4} min_visible_upper_body_joints={}",
+            "exrec_start_session(): config applied min_confidence={:.4} smoothing_window={} enter_confidence={:.4} exit_confidence={:.4} enter_frames={} exit_frames={} ema_alpha={:.4} min_visibility={:.4} min_visible_upper_body_joints={} null_exit_window_seconds={:.2} null_exit_window_threshold={:.2}",
             guard.config.min_confidence,
             guard.config.smoothing_window,
             guard.config.enter_confidence,
@@ -336,7 +362,9 @@ pub extern "C" fn exrec_start_session(
             guard.config.exit_frames,
             guard.config.ema_alpha,
             guard.config.min_visibility,
-            guard.config.min_visible_upper_body_joints
+            guard.config.min_visible_upper_body_joints,
+            guard.config.null_exit_window_seconds,
+            guard.config.null_exit_window_threshold
         ));
         return;
     }
@@ -520,6 +548,30 @@ pub extern "C" fn exrec_ingest_landmarks_buffer(values: *const c_double, len: us
                 guard.pending_class_id = None;
                 guard.pending_class_count = 0;
                 guard.low_confidence_count = 0;
+            }
+
+            let now = Instant::now();
+            guard.frame_times.push_back(now);
+            let max_age = guard.config.null_exit_window_seconds;
+            guard.frame_times
+                .retain(|&t| now.duration_since(t).as_secs_f32() <= max_age);
+
+            if winner_class_id == null_class_id && winner_confidence >= guard.config.null_exit_window_threshold {
+                guard.null_probs_count += 1;
+            } else {
+                guard.null_probs_count = 0;
+            }
+
+            if guard.null_probs_count > 0
+                && guard.frame_times.len() > 0
+                && (guard.null_probs_count as f32 / guard.frame_times.len() as f32) >= guard.config.null_exit_window_threshold
+            {
+                log_debug("exrec_ingest_landmarks_buffer(): null_exit_window triggered");
+                guard.active_class_id = None;
+                guard.pending_class_id = None;
+                guard.pending_class_count = 0;
+                guard.low_confidence_count = 0;
+                guard.null_probs_count = 0;
             }
         } else {
             let can_enter = quality_ok
