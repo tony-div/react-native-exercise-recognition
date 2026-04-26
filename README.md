@@ -69,19 +69,19 @@ exerciseRecognition.stopSession()
 
 #### StartSessionConfig
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `minConfidence` | `number` | `0.5` | Minimum confidence threshold for predictions |
-| `smoothingWindow` | `number` | `5` | Window size for temporal smoothing |
-| `enterConfidence` | `number` | `0.6` | Confidence required to enter an exercise state |
-| `exitConfidence` | `number` | `0.4` | Confidence required to exit an exercise state |
-| `enterFrames` | `number` | `3` | Consecutive frames needed to enter exercise |
-| `exitFrames` | `number` | `5` | Consecutive frames needed to exit exercise |
-| `emaAlpha` | `number` | `0.3` | EMA smoothing factor (0-1) |
-| `minVisibility` | `number` | `0.5` | Minimum visibility threshold for landmarks |
-| `minVisibleUpperBodyJoints` | `number` | `8` | Minimum visible upper body joints required |
-| `nullExitWindowSeconds` | `number` | `2.0` | Time window for null state exit |
-| `nullExitWindowThreshold` | `number` | `0.3` | Threshold for null state exit |
+| Property | Default | Description |
+|----------|---------|-------------|
+| `minConfidence` | `0.5` | Minimum confidence to return a non-null prediction |
+| `smoothingWindow` | `5` | Number of recent predictions to average for stability |
+| `enterConfidence` | `0.6` | Confidence threshold to transition into an exercise |
+| `exitConfidence` | `0.4` | Confidence threshold to transition out of an exercise |
+| `enterFrames` | `3` | Consecutive frames above `enterConfidence` needed to start an exercise |
+| `exitFrames` | `5` | Consecutive frames below `exitConfidence` needed to stop an exercise |
+| `emaAlpha` | `0.3` | Exponential moving average weight (higher = more responsive, lower = smoother) |
+| `minVisibility` | `0.5` | Minimum visibility score for a landmark to be considered valid |
+| `minVisibleUpperBodyJoints` | `8` | Minimum number of upper body joints that must meet `minVisibility` |
+| `nullExitWindowSeconds` | `2.0` | Duration of silence required before allowing exit from null state |
+| `nullExitWindowThreshold` | `0.3` | Maximum confidence during `nullExitWindowSeconds` to trigger null exit |
 
 ### Important behavior
 
