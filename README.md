@@ -7,7 +7,7 @@ It exposes a small JS API backed by a C++ HybridObject and Rust classifier runti
 ## Install
 
 ```bash
-npm install github:tony-div/react-native-exercise-recognition#v1.1.0 github:tony-div/react-native-pose-landmarks#v1.1.0 react-native-nitro-modules
+npm install react-native-exercise-recognition react-native-nitro-modules react-native-pose-landmarks
 ```
 
 ## Usage
@@ -30,7 +30,15 @@ if (!loaded) {
   throw new Error('Failed to load exercise model')
 }
 
-exerciseRecognition.startSession({ minConfidence: 0.6, smoothingWindow: 5 })
+exerciseRecognition.startSession({
+  minConfidence: 0.6,
+  smoothingWindow: 5,
+  enterConfidence: 0.7,
+  exitConfidence: 0.4,
+  emaAlpha: 0.3,
+  minVisibility: 0.5,
+  minVisibleUpperBodyJoints: 8,
+})
 
 function onPoseFrame(buffer: number[]) {
   if (buffer.length !== LANDMARK_COUNT * VALUES_PER_LANDMARK) return
@@ -52,12 +60,28 @@ exerciseRecognition.stopSession()
 
 - `loadModelFromJson(modelJson: string): boolean`
 - `loadModelFromAsset(assetName: string): boolean`
-- `startSession(config?: { minConfidence?: number; smoothingWindow?: number }): void`
+- `startSession(config?: StartSessionConfig): void`
 - `stopSession(): void`
 - `ingestLandmarksBuffer(landmarks: number[]): void`
 - `getCurrentExercise(): string | null`
 - `getCurrentConfidence(): number`
 - `getLastClassifierInferenceTimeMs(): number`
+
+#### StartSessionConfig
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `minConfidence` | `number` | `0.5` | Minimum confidence threshold for predictions |
+| `smoothingWindow` | `number` | `5` | Window size for temporal smoothing |
+| `enterConfidence` | `number` | `0.6` | Confidence required to enter an exercise state |
+| `exitConfidence` | `number` | `0.4` | Confidence required to exit an exercise state |
+| `enterFrames` | `number` | `3` | Consecutive frames needed to enter exercise |
+| `exitFrames` | `number` | `5` | Consecutive frames needed to exit exercise |
+| `emaAlpha` | `number` | `0.3` | EMA smoothing factor (0-1) |
+| `minVisibility` | `number` | `0.5` | Minimum visibility threshold for landmarks |
+| `minVisibleUpperBodyJoints` | `number` | `8` | Minimum visible upper body joints required |
+| `nullExitWindowSeconds` | `number` | `2.0` | Time window for null state exit |
+| `nullExitWindowThreshold` | `number` | `0.3` | Threshold for null state exit |
 
 ### Important behavior
 
@@ -125,8 +149,6 @@ If you change any `*.nitro.ts` file:
 ## Example app
 
 The demo app lives in `example/` and links this package via `file:..`.
-
-It pins `react-native-pose-landmarks` to the published GitHub release tag `v1.1.0`.
 
 Run the example from `example/`:
 
