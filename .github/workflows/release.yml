@@ -36,6 +36,9 @@ jobs:
           cd ..
           chmod +x example/android/gradlew
 
+      - name: Build TypeScript
+        run: npm run typescript
+
       - name: Build release APK
         working-directory: example/android
         run: ./gradlew assembleRelease --no-daemon
