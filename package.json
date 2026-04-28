@@ -9,6 +9,7 @@
   "source": "src/index",
   "files": [
     "src",
+    "tsconfig.json",
     "scripts",
     "react-native.config.js",
     "lib",
@@ -40,6 +41,7 @@
     "lint-ci": "eslint \"**/*.{js,ts,tsx}\" -f @jamesacarr/github-actions",
     "typescript": "tsc",
     "specs": "tsc --noEmit false && nitrogen --logLevel=\"debug\"",
+    "prepare": "npm run typescript",
     "postinstall": "node scripts/download-assets.js"
   },
   "keywords": [
